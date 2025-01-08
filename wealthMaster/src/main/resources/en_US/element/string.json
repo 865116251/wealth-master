@@ -1,0 +1,16 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "WealthMasterAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "WealthMasterAbility_label",
+      "value": "label"
+    }
+  ]
+}
