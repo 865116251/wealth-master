@@ -66,14 +66,14 @@ struct incomeTotalInput{
 
 
 class expendItemClass{
-  id : number = 0;
+  id : number|null = null;
   title : string = '';
   parentId : number | null  = null;
   sum : number;
   childList:expendItemClass[] | null;
   type : number | null; // 0-未知 1-生活开销 2-存储 3-投资理财 4-娱乐消费
 
-  constructor(id:number,title:string,parentId:number | null,sum:number,childList:expendItemClass[] | null,type:number | null) {
+  constructor(id:number|null,title:string,parentId:number | null,sum:number,childList:expendItemClass[] | null,type:number | null) {
     this.id = id;
     this.title = title;
     this.parentId = parentId;
@@ -92,14 +92,31 @@ struct addDialog {
   }
   confirm: () => void = () => {
   }
-
+  @Link selectIndex:number;
+  @Link selectValue:string;
   build() {
     Column(){
       Text('请填写需要增加的选项').fontSize(20).margin({top:20})
-      TextInput({placeholder: '', text: this.textValue}).height(80).width('90%')
+      Row(){
+        Text('所属类型').fontSize(15).margin({right:20})
+        Select([{value:'日常开销'},{value:'每月储备'}])
+          .selected(this.selectIndex)
+          .value(this.selectValue)
+          .font({size:15,weight:300})
+          .selectedOptionFont({size:18,weight:500})
+          .onSelect((index:number,value:string)=>{
+            this.selectIndex = index;
+            this.selectValue = value;
+            console.log("selectIndex:" + this.selectIndex);
+            console.log("selectValue:" + this.selectValue);
+          })
+      }.margin({left:30,top:20})
+      .width('100%')
+
+      TextInput({placeholder: '', text: this.textValue}).height(50).width('90%')
         .onChange((value:string)=>{
           this.textValue = value
-        })
+        }).margin({top:10})
       Flex({ justifyContent: FlexAlign.SpaceAround }) {
         Button('cancel')
           .onClick(() => {
@@ -116,8 +133,8 @@ struct addDialog {
               this.confirm()
             }
           }).fontColor(Color.Red)
-      }.margin({ bottom: 10 })
-    }.borderRadius(10)
+      }.margin({ bottom: 10 ,top:20})
+    }.borderRadius(10).height('40%')
   }
 }
 
@@ -125,13 +142,17 @@ struct addDialog {
 @Preview
 @Component
 struct expendItemList{
-  @State textValue: string = ''
+  @State textValue: string = '';
+  @State type:number = 0;
+  @State selectValue:string = '日常开销';
+
   dialogController: CustomDialogController | null = new CustomDialogController({
     builder: addDialog({
       cancel: ()=> { this.onCancel() },
       confirm: ()=> { this.onAccept() },
       textValue: $textValue,
-      // inputValue: $inputValue
+      selectIndex: $type,
+      selectValue: $selectValue
     }),
     cancel: this.exitApp,
     autoCancel: true,
@@ -152,19 +173,20 @@ struct expendItemList{
     cornerRadius: 10,
   })
 
-  dailyExpendList : expendItemClass[] = [
+  public dailyExpendList : expendItemClass[] = [
     new expendItemClass(10,'生活费',1,100,null,1),
     new expendItemClass(11,'交通费',1,100,null,1)
   ];
 
-  storeExpendList : expendItemClass[] = [
+  public storeExpendList : expendItemClass[] = [
     new expendItemClass(20,'备用金',2,300,null,2)
   ]
 
-  @State expendItems : expendItemClass[] = [
+  public expendItems : expendItemClass[] = [
     new expendItemClass(1,'日常开销',null,200,this.dailyExpendList,null),
     new expendItemClass(2,'每月储备',null,300,this.storeExpendList,null)
   ];
+
 
   onCancel() {
     console.info('Callback when the first button is clicked')
@@ -172,6 +194,16 @@ struct expendItemList{
 
   onAccept() {
     console.info('Callback when the second button is clicked')
+    console.log("this.textValue:" +this.textValue);
+    console.log("selectIndex:" + this.type);
+    //todo: 无响应
+    this.expendItems.forEach(value=>{
+      if(value.title === this.selectValue){
+        const newItem : expendItemClass = new expendItemClass(null,this.textValue,value.id,0,null,this.type);
+        value.childList?.push(newItem);
+      }
+    })
+    console.log("expendItems:" + this.expendItems);
   }
   exitApp() {
     console.info('Click the callback in the blank area')
