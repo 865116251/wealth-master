@@ -29,10 +29,29 @@ struct Wage {
           .alignSelf(ItemAlign.Center)
       }.width('100%')
       .height('60%')
+      .margin({bottom:10})
       //资金分布
-      statistics()
-        .width('100%')
-        .height('40%')
+      Row(){
+        Text('资金类别分布')
+          .width('100%')
+          .height('100%')
+          .fontSize(25)
+          .fontFamily('HarmonyHeiTi-Bold')
+          .fontWeight(FontWeight.Bold)
+          .textAlign(TextAlign.Start)
+      }.width('50%')
+      .height('5%')
+      // .backgroundColor(Color.Red)
+
+      List(){
+        statistics()
+          .margin({top:10})
+          .width('100%')
+          .height('100%')
+          .alignSelf(ItemAlign.Center)
+      }.width('100%')
+      .height('30%')
+
 
     }
     .height('100%')
@@ -173,20 +192,19 @@ struct expendItemList{
     cornerRadius: 10,
   })
 
-  public dailyExpendList : expendItemClass[] = [
+  @State dailyExpendList : expendItemClass[] = [
     new expendItemClass(10,'生活费',1,100,null,1),
     new expendItemClass(11,'交通费',1,100,null,1)
   ];
 
-  public storeExpendList : expendItemClass[] = [
+  @State storeExpendList : expendItemClass[] = [
     new expendItemClass(20,'备用金',2,300,null,2)
   ]
 
-  public expendItems : expendItemClass[] = [
+  @State expendItems : expendItemClass[] = [
     new expendItemClass(1,'日常开销',null,200,this.dailyExpendList,null),
     new expendItemClass(2,'每月储备',null,300,this.storeExpendList,null)
   ];
-
 
   onCancel() {
     console.info('Callback when the first button is clicked')
@@ -196,14 +214,16 @@ struct expendItemList{
     console.info('Callback when the second button is clicked')
     console.log("this.textValue:" +this.textValue);
     console.log("selectIndex:" + this.type);
-    //todo: 无响应
+    console.log("expendItems1:" + this.expendItems);
     this.expendItems.forEach(value=>{
       if(value.title === this.selectValue){
         const newItem : expendItemClass = new expendItemClass(null,this.textValue,value.id,0,null,this.type);
         value.childList?.push(newItem);
       }
     })
-    console.log("expendItems:" + this.expendItems);
+    //todo: 暂时解决expendItems无响应的问题，需要更新this.expendItems
+    this.expendItems.reverse()
+    this.expendItems.reverse()
   }
   exitApp() {
     console.info('Click the callback in the blank area')
@@ -219,7 +239,7 @@ struct expendItemList{
                 Text(item.title)
                   .width('100%')
                   .height('100%')
-                  .fontSize(30)
+                  .fontSize(20)
                   .fontFamily('HarmonyHeiTi-Bold')
                   .fontWeight(FontWeight.Bold)
                   .textAlign(TextAlign.Start)
@@ -228,7 +248,7 @@ struct expendItemList{
                 Text(item.sum.toString())
                   .width('100%')
                   .height('100%')
-                  .fontSize(25)
+                  .fontSize(20)
                   .fontFamily('HarmonyHeiTi-Bold')
                   .fontWeight(FontWeight.Bold)
                   .textAlign(TextAlign.End)
@@ -243,12 +263,14 @@ struct expendItemList{
                   Text(child.title)
                     .width('30%')
                     .height('100%')
-                    .fontSize(20)
+                    .fontSize(18)
                     .fontFamily('HarmonyHeiTi-Bold')
                     .fontWeight(FontWeight.Bold)
                     .textAlign(TextAlign.Start)
                   TextInput()
                     .width('70%')
+                    .height(30)
+                    .fontSize(15)
                     .type(InputType.Number)
                     .textAlign(TextAlign.End)
                     .onChange((value:string) =>{
@@ -257,56 +279,80 @@ struct expendItemList{
                 }
                 .margin({top:10,left:10})
                 .width('100%')
-                .height('5%')
+                .height('10%')
               }
             })
             // .backgroundColor(Color.Red)
           }
           .margin({top:10})
           .width('95%')
-          .backgroundColor(Color.Green)
+          // .backgroundColor(Color.Green)
         })
         RelativeContainer(){
-          Button('增加')
-            .id('addBtn')
-            .fontColor(Color.Gray)
+          Column(){
+            Row(){
+              Text('待分配金额:')
+                .fontSize(20)
+                .fontColor(Color.Black)
+              Text('2000')
+                .fontSize(20)
+                .margin({left:50})
+            }
+            .height('50%')
+            .margin({bottom:10})
             .alignRules({
               middle:{
                 anchor:'__container__',
                 align:HorizontalAlign.Center
               }
             })
-            .backgroundColor(Color.White)
-            .onClick(()=>{
-              if(this.dialogController!=null){
-                this.dialogController.open();
-              }
-            })
+
+            Button('增加')
+              .id('addBtn')
+              .fontColor(Color.White)
+              .backgroundColor(Color.Gray)
+              .onClick(()=>{
+                if(this.dialogController!=null){
+                  this.dialogController.open();
+                }
+              })
+          }
+          .alignRules({
+            middle:{
+              anchor:'__container__',
+              align:HorizontalAlign.Center
+            }
+          })
+          .width('100%')
+          .height('100%')
         }
         .margin({top:10})
         .width('100%')
-        .height('10%')
+        .height('20%')
         .position({bottom:0})
       }
       // .justifyContent(FlexAlign.Start)
       .width('100%')
       .height('100%')
-      .backgroundColor(Color.Blue)
+      // .backgroundColor(Color.Blue)
   }
 }
 
-// @Preview
-// @CustomDialog
-// struct addDialog{
-//   controller?CustomerDialogController
-//   build(){
-//     RelativeContainer(){
-//
-//     }.width('100%')
-//     .height('100%')
-//     .backgroundColor()
-//   }
-// }
+class flowItem{
+  id : number|null = null;
+  icon:ResourceStr | null = null;
+  title : string = '';
+  typeList : number[]  = [];
+  sum : number;
+
+  constructor(id:number|null,icon:ResourceStr | null,title:string,typeList:number[],sum:number,) {
+    this.id = id;
+    this.icon = icon;
+    this.title = title;
+    this.typeList = typeList;
+    this.sum = sum;
+  }
+}
 
 /**
  * 统计
@@ -314,12 +360,12 @@ struct expendItemList{
 @Preview
 @Component
 struct statistics{
-  dailyExpendList : expendItemClass[] = [
+  @State dailyExpendList : expendItemClass[] = [
     new expendItemClass(10,'生活费',1,100,null,1),
     new expendItemClass(11,'交通费',1,100,null,1)
   ];
 
-  storeExpendList : expendItemClass[] = [
+  @State storeExpendList : expendItemClass[] = [
     new expendItemClass(20,'备用金',2,300,null,2)
   ]
 
@@ -328,26 +374,41 @@ struct statistics{
     new expendItemClass(2,'每月储备',null,300,this.storeExpendList,null)
   ];
 
+  @State capitalFlowList :flowItem[] = [
+    new flowItem(1,$r('app.media.chineseBankIcon'),'中国银行',[1],100),
+    new flowItem(1,$r('app.media.jiansheBank'),'建设银行',[1],100),
+    new flowItem(1,$r('app.media.zhaoshangBank'),'招商银行',[1],100),
+    new flowItem(1,$r('app.media.zhifubao'),'支付宝',[1],100)
+  ]
 
 
   build(){
-    Column(){
-      Row(){
-        Text('资金类别分布')
-          .width('100%')
-          .height('100%')
-          .fontSize(25)
-          .fontFamily('HarmonyHeiTi-Bold')
-          .fontWeight(FontWeight.Bold)
-          .textAlign(TextAlign.Start)
-      }.width('50%')
-      .height('10%')
-      .backgroundColor(Color.Red)
-
       Column(){
+        ForEach(this.capitalFlowList,(item:flowItem)=>{
+          Column(){
+            Row(){
+              Row(){
+                Image(item.icon)
+                  .width(20)
+                  .height(20)
+                  .margin({left:5,right:5})
+                Text(item.title)
+                  .fontSize(20)
+              }.width('50%')
 
+              Row(){
+                Text(item.sum.toString())
+                  .width('100%')
+                  .fontSize(20)
+                  .textAlign(TextAlign.End)
+              }.width('50%')
+            }.width('100%')
+            .height(50)
+          }.width('95%')
+          // .backgroundColor(Color.Orange)
+        })
       }.width('100%')
-      
-    }
+      .height('100%')
+      // .backgroundColor(Color.Yellow)
   }
 }
